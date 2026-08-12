@@ -23,7 +23,7 @@ dotnet run
 ```
 
 ### 2. Open in Browser
-👉 **[http://localhost:5000](http://localhost:5000)** (or `https://localhost:5001`)
+👉 **[http://localhost:5000](http://localhost:5233)** (or `https://localhost:5001`)
 
 > 💡 **Automatic Database Setup**: The application automatically creates and seeds the SQLite database (`assignment_mgmt.db`) with working demo data on launch.
 
