@@ -4,7 +4,7 @@ A unified C# ASP.NET Core Web Application combining REST APIs, EF Core Database 
 
 ---
 
-## 🌟 Overview
+## Overview
 
 The **Assignment & Submission Management System** is built entirely with C# and ASP.NET Core MVC & Web APIs:
 - **Teachers** can create, publish, or draft assignments, assign them to specific courses and subjects, set deadlines, view student submissions, and award marks with feedback.
@@ -13,7 +13,7 @@ The **Assignment & Submission Management System** is built entirely with C# and 
 
 ---
 
-## 🚀 How to Run the Application (Single Command!)
+##  How to Run the Application (Single Command!)
 
 You do **not** need Node.js, `npm`, or XML build scripts. Everything is handled natively by ASP.NET Core!
 
@@ -23,13 +23,13 @@ dotnet run
 ```
 
 ### 2. Open in Browser
-👉 **[http://localhost:5000](http://localhost:5233)** (or `https://localhost:5000`)
+   **[http://localhost:5000](http://localhost:5233)** (or `https://localhost:5000`)
 
-> 💡 **Automatic Database Setup**: The application automatically creates and seeds the SQLite database (`assignment_mgmt.db`) with working demo data on launch.
+>  **Automatic Database Setup**: The application automatically creates and seeds the SQLite database (`assignment_mgmt.db`) with working demo data on launch.
 
 ---
 
-## 🔑 Demo Credentials
+##  Demo Credentials
 
 Click the quick demo buttons on the login page or enter:
 
@@ -41,7 +41,7 @@ Click the quick demo buttons on the login page or enter:
 
 ---
 
-## 🧪 How to Run Unit Tests
+##  How to Run Unit Tests
 
 To run the xUnit test suite (covering business rules, authorization, and submission workflows):
 
@@ -51,7 +51,7 @@ dotnet test Assignment_Submission_Management_System.Tests/Assignment_Submission_
 
 ---
 
-## 🛠️ Technology Stack
+##  Technology Stack
 
 - **Framework**: ASP.NET Core MVC & Web API (.NET 10 / C#)
 - **Frontend Views**: HTML5, Tailwind CSS, FontAwesome Icons, JavaScript (Fetch API)
@@ -62,7 +62,7 @@ dotnet test Assignment_Submission_Management_System.Tests/Assignment_Submission_
 
 ---
 
-## 📁 Project Structure
+##  Project Structure
 
 ```
 .
