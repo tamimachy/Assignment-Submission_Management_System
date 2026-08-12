@@ -1,8 +1,723 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@{
+    ViewData["Title"] = "EduPort - Assignment & Submission Portal";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<!-- MAIN APP CONTAINER -->
+<div id="appContainer" class="min-h-screen flex flex-col">
+    <!-- AUTH SECTION (Show when logged out) -->
+    <div id="authSection" class="min-h-screen flex flex-col justify-center items-center px-4 py-12 relative overflow-hidden bg-slate-950">
+        <!-- Ambient Glow -->
+        <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-indigo-600/20 rounded-full blur-[120px] pointer-events-none"></div>
+
+        <div class="w-full max-w-md bg-slate-900/90 border border-slate-800 rounded-3xl p-8 shadow-2xl backdrop-blur-xl relative z-10">
+            <div class="text-center mb-6">
+                <div class="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-indigo-500/30 mb-3">
+                    AS
+                </div>
+                <h1 class="text-2xl font-extrabold text-white tracking-tight">EduPort Portal</h1>
+                <p class="text-xs text-slate-400 mt-1">Assignment & Submission Management System</p>
+            </div>
+
+            <!-- Demo Quick Credentials -->
+            <div class="mb-6 p-3 rounded-2xl bg-slate-800/60 border border-slate-700/60 text-xs">
+                <p class="text-slate-400 font-semibold mb-2 text-center">Quick Demo Credentials:</p>
+                <div class="grid grid-cols-3 gap-2">
+                    <button type="button" onclick="setDemoLogin('admin@school.com', 'Admin123!')" class="py-1.5 px-2 rounded-xl border border-slate-700 bg-slate-800 text-rose-400 hover:bg-slate-700 text-[11px] font-semibold transition-all">
+                        <i class="fa-solid fa-user-shield me-1"></i> Admin
+                    </button>
+                    <button type="button" onclick="setDemoLogin('teacher@school.com', 'Teacher123!')" class="py-1.5 px-2 rounded-xl border border-slate-700 bg-slate-800 text-amber-400 hover:bg-slate-700 text-[11px] font-semibold transition-all">
+                        <i class="fa-solid fa-chalkboard-user me-1"></i> Teacher
+                    </button>
+                    <button type="button" onclick="setDemoLogin('student@school.com', 'Student123!')" class="py-1.5 px-2 rounded-xl border border-slate-700 bg-slate-800 text-emerald-400 hover:bg-slate-700 text-[11px] font-semibold transition-all">
+                        <i class="fa-solid fa-user-graduate me-1"></i> Student
+                    </button>
+                </div>
+            </div>
+
+            <form id="loginForm" onsubmit="handleLogin(event); return false;" class="space-y-4">
+                <div id="authAlert" class="hidden p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-medium"></div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1.5">Email Address</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-envelope absolute left-3.5 top-3 text-slate-500 text-sm"></i>
+                        <input type="email" id="loginEmail" value="admin@school.com" placeholder="user@school.com" class="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500" required />
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1.5">Password</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-lock absolute left-3.5 top-3 text-slate-500 text-sm"></i>
+                        <input type="password" id="loginPassword" value="Admin123!" placeholder="••••••••" class="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500" required />
+                    </div>
+                </div>
+
+                <button type="submit" id="authSubmitBtn" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm shadow-lg shadow-indigo-600/30 transition-all">
+                    Sign In to Portal
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- PORTAL DASHBOARD SECTION (Show when logged in) -->
+    <div id="dashboardSection" class="hidden min-h-screen flex flex-col bg-slate-950 text-slate-100">
+        <!-- TOP NAVBAR -->
+        <header class="sticky top-0 z-40 w-full border-b border-slate-800 bg-slate-900/90 backdrop-blur-md">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+                <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('overview')">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white font-bold shadow-lg shadow-indigo-500/20">
+                        AS
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-bold text-white leading-none">EduPort Portal</h1>
+                        <p class="text-xs text-slate-400 font-medium">C# ASP.NET Core & HTML View System</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-3 px-3 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700/60">
+                        <div class="w-8 h-8 rounded-lg bg-indigo-900/50 text-indigo-300 flex items-center justify-center font-bold text-sm" id="userAvatar">
+                            A
+                        </div>
+                        <div class="text-left">
+                            <p class="text-xs font-bold text-slate-200 leading-none mb-1" id="userName">User Name</p>
+                            <span id="userRoleBadge" class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                                Role
+                            </span>
+                        </div>
+                    </div>
+
+                    <button onclick="handleLogout()" class="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-rose-400 hover:bg-rose-950/40 border border-rose-900/40 transition-colors">
+                        <i class="fa-solid fa-right-from-bracket"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- CONTENT BODY WITH SIDEBAR -->
+        <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col md:flex-row gap-6">
+            <!-- SIDEBAR -->
+            <aside class="w-full md:w-64 bg-slate-900/90 text-slate-300 p-4 flex flex-col gap-2 rounded-2xl border border-slate-800 shadow-xl">
+                <div class="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-slate-500">Navigation</div>
+                <nav class="flex flex-row md:flex-col gap-1 overflow-x-auto" id="sidebarNav">
+                    <button onclick="switchTab('overview')" id="nav-overview" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white shadow-md">
+                        <i class="fa-solid fa-chart-line w-4"></i> Overview
+                    </button>
+                    <button onclick="switchTab('assignments')" id="nav-assignments" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:bg-slate-800 hover:text-white">
+                        <i class="fa-solid fa-file-signature w-4"></i> Assignments
+                    </button>
+                    <button onclick="switchTab('submissions')" id="nav-submissions" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:bg-slate-800 hover:text-white">
+                        <i class="fa-solid fa-paper-plane w-4"></i> Submissions
+                    </button>
+                    <button onclick="switchTab('courses')" id="nav-courses" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:bg-slate-800 hover:text-white hidden">
+                        <i class="fa-solid fa-book-bookmark w-4"></i> Courses & Subjects
+                    </button>
+                    <button onclick="switchTab('users')" id="nav-users" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:bg-slate-800 hover:text-white hidden">
+                        <i class="fa-solid fa-users-gear w-4"></i> User Management
+                    </button>
+                </nav>
+            </aside>
+
+            <!-- MAIN TAB CONTENT -->
+            <div class="flex-1 space-y-6">
+                <!-- TAB 1: OVERVIEW -->
+                <div id="tab-overview" class="tab-pane space-y-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-extrabold text-white tracking-tight" id="welcomeTitle">Welcome Back!</h2>
+                            <p class="text-xs text-slate-400 mt-1">System dashboard metrics and activity overview.</p>
+                        </div>
+                        <button onclick="loadDashboardData()" class="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white">
+                            <i class="fa-solid fa-arrows-rotate"></i>
+                        </button>
+                    </div>
+
+                    <!-- METRICS GRID -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="statsGrid">
+                        <!-- Populated by JS -->
+                    </div>
+
+                    <!-- RECENT ASSIGNMENTS CARD -->
+                    <div class="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 shadow-xl space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                                <i class="fa-solid fa-file-lines text-indigo-400"></i> Recent Assignments
+                            </h3>
+                            <button onclick="switchTab('assignments')" class="text-xs font-semibold text-indigo-400 hover:text-indigo-300">View All →</button>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="recentAssignmentsGrid"></div>
+                    </div>
+                </div>
+
+                <!-- TAB 2: ASSIGNMENTS -->
+                <div id="tab-assignments" class="tab-pane hidden space-y-6">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div>
+                            <h2 class="text-2xl font-extrabold text-white">Course Assignments</h2>
+                            <p class="text-xs text-slate-400 mt-1">View, manage, and submit course assignments.</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button id="btnCreateAssignment" onclick="openAssignmentModal()" class="hidden inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs shadow-md shadow-indigo-600/30">
+                                <i class="fa-solid fa-plus"></i> Create Assignment
+                            </button>
+                        </div>
+                    </div>
+                    <div class="space-y-4" id="assignmentsList"></div>
+                </div>
+
+                <!-- TAB 3: SUBMISSIONS -->
+                <div id="tab-submissions" class="tab-pane hidden space-y-6">
+                    <div>
+                        <h2 class="text-2xl font-extrabold text-white">Student Submissions</h2>
+                        <p class="text-xs text-slate-400 mt-1">Review student answers, award marks, and provide feedback.</p>
+                    </div>
+                    <div class="space-y-4" id="submissionsList"></div>
+                </div>
+
+                <!-- TAB 4: COURSES & SUBJECTS -->
+                <div id="tab-courses" class="tab-pane hidden space-y-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-extrabold text-white">Courses & Subjects</h2>
+                            <p class="text-xs text-slate-400 mt-1">Manage academic courses and assigned subject teachers.</p>
+                        </div>
+                        <div class="flex items-center gap-2" id="courseAdminBtns">
+                            <button onclick="openCourseModal()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs">+ Add Course</button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 gap-6" id="coursesList"></div>
+                </div>
+
+                <!-- TAB 5: USERS -->
+                <div id="tab-users" class="tab-pane hidden space-y-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-extrabold text-white">User Management</h2>
+                            <p class="text-xs text-slate-400 mt-1">System user administration.</p>
+                        </div>
+                        <button onclick="openUserModal()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs">+ Add User Account</button>
+                    </div>
+                    <div class="bg-slate-900/80 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+                        <table class="w-full text-left text-xs text-slate-300">
+                            <thead class="bg-slate-800/80 text-slate-400 font-semibold uppercase">
+                                <tr>
+                                    <th class="p-4">User Name</th>
+                                    <th class="p-4">Email</th>
+                                    <th class="p-4">Role</th>
+                                    <th class="p-4">Course</th>
+                                    <th class="p-4 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTableBody" class="divide-y divide-slate-800/60"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
 </div>
+
+<!-- MODAL: CREATE / EDIT ASSIGNMENT -->
+<div id="assignmentModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg shadow-2xl p-6 space-y-4 text-slate-100">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <h3 class="text-lg font-bold text-white" id="assignmentModalTitle">Create Assignment</h3>
+            <button onclick="closeModal('assignmentModal')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <form onsubmit="saveAssignment(event)" class="space-y-4">
+            <input type="hidden" id="asgnId" />
+            <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1">Title *</label>
+                <input type="text" id="asgnTitle" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white" required />
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1">Subject *</label>
+                <select id="asgnSubjectId" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white" required></select>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Deadline *</label>
+                    <input type="datetime-local" id="asgnDeadline" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white" required />
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Max Marks *</label>
+                    <input type="number" id="asgnMaxMarks" value="100" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white" required />
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1">Description *</label>
+                <textarea id="asgnDesc" rows="3" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white" required></textarea>
+            </div>
+            <div class="flex items-center gap-2">
+                <input type="checkbox" id="asgnIsDraft" class="w-4 h-4" />
+                <label for="asgnIsDraft" class="text-xs text-slate-300">Keep as Draft</label>
+            </div>
+            <div class="flex justify-end gap-3 pt-3 border-t border-slate-800">
+                <button type="button" onclick="closeModal('assignmentModal')" class="px-4 py-2 text-xs font-semibold text-slate-400">Cancel</button>
+                <button type="submit" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs">Save Assignment</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL: SUBMIT / EDIT ANSWER -->
+<div id="submissionModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg shadow-2xl p-6 space-y-4 text-slate-100">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <h3 class="text-lg font-bold text-white">Submit Assignment Answer</h3>
+            <button onclick="closeModal('submissionModal')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <form onsubmit="saveSubmission(event)" class="space-y-4">
+            <input type="hidden" id="subAsgnId" />
+            <input type="hidden" id="subId" />
+            <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1">Answer Solution *</label>
+                <textarea id="subAnswerContent" rows="5" placeholder="Write your submission content here..." class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white" required></textarea>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1">GitHub / Attachment Link (Optional)</label>
+                <input type="url" id="subAttachmentUrl" placeholder="https://github.com/example/repo" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white" />
+            </div>
+            <div class="flex justify-end gap-3 pt-3 border-t border-slate-800">
+                <button type="button" onclick="closeModal('submissionModal')" class="px-4 py-2 text-xs font-semibold text-slate-400">Cancel</button>
+                <button type="submit" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs">Submit Answer</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL: GRADE SUBMISSION -->
+<div id="gradeModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg shadow-2xl p-6 space-y-4 text-slate-100">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <h3 class="text-lg font-bold text-white">Grade Student Submission</h3>
+            <button onclick="closeModal('gradeModal')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <form onsubmit="saveGrade(event)" class="space-y-4">
+            <input type="hidden" id="gradeSubId" />
+            <div class="p-3 rounded-xl bg-slate-800/60 border border-slate-700/60 text-xs space-y-1">
+                <p id="gradeStudentInfo" class="font-bold text-white"></p>
+                <p id="gradeAnswerPreview" class="text-slate-300 font-mono"></p>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Marks Awarded *</label>
+                    <input type="number" id="gradeMarks" min="0" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white" required />
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Status *</label>
+                    <select id="gradeStatus" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white">
+                        <option value="2">Graded</option>
+                        <option value="3">Needs Revision</option>
+                    </select>
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1">Teacher Feedback Notes</label>
+                <textarea id="gradeFeedback" rows="3" placeholder="Feedback comments..." class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white"></textarea>
+            </div>
+            <div class="flex justify-end gap-3 pt-3 border-t border-slate-800">
+                <button type="button" onclick="closeModal('gradeModal')" class="px-4 py-2 text-xs font-semibold text-slate-400">Cancel</button>
+                <button type="submit" class="px-5 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-semibold text-xs">Save Grade</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    var token = localStorage.getItem('jwt_token');
+    var currentUser = null;
+    try {
+        var rawUser = localStorage.getItem('user_data');
+        if (rawUser && rawUser !== 'undefined') {
+            currentUser = JSON.parse(rawUser);
+        }
+    } catch (e) {
+        currentUser = null;
+    }
+    var subjectsCache = [];
+    var assignmentsCache = [];
+
+    function setDemoLogin(email, password) {
+        document.getElementById('loginEmail').value = email;
+        document.getElementById('loginPassword').value = password;
+        handleLogin();
+    }
+
+    async function handleLogin(e) {
+        if (e && e.preventDefault) e.preventDefault();
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
+        const alertBox = document.getElementById('authAlert');
+        const submitBtn = document.getElementById('authSubmitBtn');
+        
+        if (!email || !password) return;
+        
+        if (submitBtn) submitBtn.disabled = true;
+        alertBox.classList.add('hidden');
+
+        try {
+            const res = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+
+            if (!res.ok) {
+                let errText = 'Login failed';
+                try {
+                    const errObj = await res.json();
+                    errText = errObj.message || errText;
+                } catch {
+                    errText = await res.text();
+                }
+                throw new Error(errText);
+            }
+
+            const data = await res.json();
+            token = data.token;
+            currentUser = data.user || data;
+            localStorage.setItem('jwt_token', token);
+            localStorage.setItem('user_data', JSON.stringify(currentUser));
+
+            renderPortal();
+        } catch (err) {
+            alertBox.innerText = err.message || 'Authentication failed';
+            alertBox.classList.remove('hidden');
+        } finally {
+            if (submitBtn) submitBtn.disabled = false;
+        }
+    }
+
+    function handleLogout() {
+        token = null;
+        currentUser = null;
+        localStorage.removeItem('jwt_token');
+        localStorage.removeItem('user_data');
+        document.getElementById('authSection').classList.remove('hidden');
+        document.getElementById('dashboardSection').classList.add('hidden');
+    }
+
+    function renderPortal() {
+        if (!token || !currentUser) {
+            const authSec = document.getElementById('authSection');
+            const dashSec = document.getElementById('dashboardSection');
+            if (authSec) authSec.classList.remove('hidden');
+            if (dashSec) dashSec.classList.add('hidden');
+            return;
+        }
+
+        const authSec = document.getElementById('authSection');
+        const dashSec = document.getElementById('dashboardSection');
+        if (authSec) authSec.classList.add('hidden');
+        if (dashSec) dashSec.classList.remove('hidden');
+
+        const userNameEl = document.getElementById('userName');
+        if (userNameEl) userNameEl.innerText = currentUser.name || 'User';
+
+        const userAvatarEl = document.getElementById('userAvatar');
+        if (userAvatarEl && currentUser.name) {
+            userAvatarEl.innerText = currentUser.name.charAt(0).toUpperCase();
+        }
+
+        const roleStr = (currentUser.role !== undefined && currentUser.role !== null) ? currentUser.role.toString() : '';
+        const isAdmin = roleStr === 'Admin' || roleStr === '0';
+        const isTeacher = roleStr === 'Teacher' || roleStr === '1';
+        const roleDisplay = isAdmin ? 'Admin' : isTeacher ? 'Teacher' : 'Student';
+
+        const roleBadge = document.getElementById('userRoleBadge');
+        if (roleBadge) roleBadge.innerText = roleDisplay;
+
+        const navCourses = document.getElementById('nav-courses');
+        if (navCourses) {
+            if (isAdmin || isTeacher) navCourses.classList.remove('hidden');
+            else navCourses.classList.add('hidden');
+        }
+
+        const btnCreate = document.getElementById('btnCreateAssignment');
+        if (btnCreate) {
+            if (isAdmin || isTeacher) btnCreate.classList.remove('hidden');
+            else btnCreate.classList.add('hidden');
+        }
+
+        const navUsers = document.getElementById('nav-users');
+        if (navUsers) {
+            if (isAdmin) navUsers.classList.remove('hidden');
+            else navUsers.classList.add('hidden');
+        }
+
+        loadDashboardData();
+    }
+
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
+        document.getElementById('tab-' + tabId).classList.remove('hidden');
+
+        document.querySelectorAll('#sidebarNav button').forEach(btn => {
+            btn.classList.remove('bg-indigo-600', 'text-white', 'shadow-md');
+            btn.classList.add('text-slate-400');
+        });
+
+        const activeBtn = document.getElementById('nav-' + tabId);
+        if (activeBtn) {
+            activeBtn.classList.remove('text-slate-400');
+            activeBtn.classList.add('bg-indigo-600', 'text-white', 'shadow-md');
+        }
+
+        if (tabId === 'assignments') loadAssignments();
+        if (tabId === 'submissions') loadSubmissions();
+        if (tabId === 'courses') loadCourses();
+        if (tabId === 'users') loadUsers();
+    }
+
+    async function apiFetch(url, options = {}) {
+        options.headers = {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token,
+            ...(options.headers || {})
+        };
+        const res = await fetch(url, options);
+        if (res.status === 401) {
+            handleLogout();
+            throw new Error('Unauthorized');
+        }
+        return res;
+    }
+
+    async function loadDashboardData() {
+        try {
+            const statsRes = await apiFetch('/api/dashboard/stats');
+            if (statsRes.ok) {
+                const s = await statsRes.json();
+                document.getElementById('statsGrid').innerHTML = `
+                    <div class="p-5 rounded-2xl bg-slate-900 border border-indigo-500/20 shadow-xl">
+                        <span class="text-xs font-semibold text-indigo-400 uppercase">Assignments</span>
+                        <p class="text-3xl font-extrabold text-white mt-2">${s.totalAssignments}</p>
+                    </div>
+                    <div class="p-5 rounded-2xl bg-slate-900 border border-amber-500/20 shadow-xl">
+                        <span class="text-xs font-semibold text-amber-400 uppercase">Submissions</span>
+                        <p class="text-3xl font-extrabold text-white mt-2">${s.totalSubmissions}</p>
+                    </div>
+                    <div class="p-5 rounded-2xl bg-slate-900 border border-emerald-500/20 shadow-xl">
+                        <span class="text-xs font-semibold text-emerald-400 uppercase">Average Score</span>
+                        <p class="text-3xl font-extrabold text-white mt-2">${s.averageClassScore}</p>
+                    </div>
+                    <div class="p-5 rounded-2xl bg-slate-900 border border-violet-500/20 shadow-xl">
+                        <span class="text-xs font-semibold text-violet-400 uppercase">Users / Courses</span>
+                        <p class="text-3xl font-extrabold text-white mt-2">${s.totalUsers} / ${s.totalCourses}</p>
+                    </div>
+                `;
+            }
+
+            const asgnRes = await apiFetch('/api/assignments');
+            if (asgnRes.ok) {
+                assignmentsCache = await asgnRes.json();
+                document.getElementById('recentAssignmentsGrid').innerHTML = assignmentsCache.slice(0, 4).map(a => `
+                    <div class="p-4 rounded-xl bg-slate-800/50 border border-slate-700/50 space-y-2">
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">${a.subjectName}</span>
+                        <h4 class="text-sm font-bold text-white">${a.title}</h4>
+                        <p class="text-xs text-slate-400 line-clamp-2">${a.description}</p>
+                    </div>
+                `).join('');
+            }
+
+            const subjRes = await apiFetch('/api/courses/subjects');
+            if (subjRes.ok) {
+                subjectsCache = await subjRes.json();
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    async function loadAssignments() {
+        const list = document.getElementById('assignmentsList');
+        const roleStr = currentUser.role.toString();
+        const isStudent = roleStr === 'Student' || roleStr === '2';
+
+        list.innerHTML = assignmentsCache.map(a => {
+            const isClosed = new Date() > new Date(a.deadline);
+            const mySub = a.mySubmission;
+            return `
+                <div class="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 flex flex-col md:flex-row justify-between gap-4">
+                    <div class="space-y-2 flex-1">
+                        <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">${a.subjectName}</span>
+                        <h3 class="text-base font-bold text-white">${a.title}</h3>
+                        <p class="text-xs text-slate-300 whitespace-pre-wrap">${a.description}</p>
+                        <div class="text-xs text-slate-400 pt-1">Deadline: ${new Date(a.deadline).toLocaleString()} | Max Marks: <strong class="text-amber-400">${a.maximumMarks}</strong></div>
+                    </div>
+                    <div class="flex flex-col justify-center items-end gap-2">
+                        ${isStudent ? `
+                            ${mySub ? `<span class="text-xs font-bold text-emerald-400">${mySub.status} (${mySub.marksAwarded ?? '-'} / ${a.maximumMarks})</span>` : ''}
+                            <button onclick="openSubmissionModal(${a.id})" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs">
+                                ${mySub ? 'Update Solution' : 'Submit Answer'}
+                            </button>
+                        ` : `
+                            <button onclick="openAssignmentModal(${a.id})" class="px-3 py-1.5 rounded-lg bg-slate-800 text-xs text-slate-300 hover:text-white">Edit</button>
+                        `}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    async function loadSubmissions() {
+        const res = await apiFetch('/api/submissions');
+        if (res.ok) {
+            const subs = await res.json();
+            const list = document.getElementById('submissionsList');
+            const roleStr = currentUser.role.toString();
+            const isStudent = roleStr === 'Student' || roleStr === '2';
+
+            list.innerHTML = subs.map(s => `
+                <div class="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-3">
+                    <div class="flex justify-between border-b border-slate-800 pb-2">
+                        <div>
+                            <h4 class="text-sm font-bold text-white">${s.studentName}</h4>
+                            <p class="text-xs text-indigo-400">${s.assignmentTitle}</p>
+                        </div>
+                        <span class="text-xs font-bold text-amber-400">${s.status} ${s.marksAwarded != null ? `(${s.marksAwarded}/${s.maximumMarks})` : ''}</span>
+                    </div>
+                    <div class="p-3 rounded-xl bg-slate-800/60 text-xs font-mono text-slate-200">${s.answerContent}</div>
+                    ${!isStudent ? `
+                        <div class="flex justify-end">
+                            <button onclick="openGradeModal(${s.id}, '${s.studentName}', '${s.answerContent}', ${s.maximumMarks})" class="px-4 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold">Grade Submission</button>
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+    }
+
+    async function loadCourses() {
+        const res = await apiFetch('/api/courses');
+        if (res.ok) {
+            const courses = await res.json();
+            document.getElementById('coursesList').innerHTML = courses.map(c => `
+                <div class="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-3">
+                    <h3 class="text-base font-bold text-white">${c.name} (${c.code})</h3>
+                    <p class="text-xs text-slate-400">${c.description || ''}</p>
+                </div>
+            `).join('');
+        }
+    }
+
+    async function loadUsers() {
+        const res = await apiFetch('/api/users');
+        if (res.ok) {
+            const users = await res.json();
+            document.getElementById('usersTableBody').innerHTML = users.map(u => `
+                <tr class="hover:bg-slate-800/40">
+                    <td class="p-4 font-bold text-white">${u.name}</td>
+                    <td class="p-4 text-slate-400">${u.email}</td>
+                    <td class="p-4"><span class="px-2 py-0.5 rounded-full text-[10px] bg-indigo-500/10 text-indigo-400">${u.role}</span></td>
+                    <td class="p-4 text-slate-400">${u.courseName || 'N/A'}</td>
+                    <td class="p-4 text-right">--</td>
+                </tr>
+            `).join('');
+        }
+    }
+
+    function openAssignmentModal(id = null) {
+        const select = document.getElementById('asgnSubjectId');
+        select.innerHTML = subjectsCache.map(s => `<option value="${s.id}">${s.name} (${s.code})</option>`).join('');
+
+        if (id) {
+            const a = assignmentsCache.find(x => x.id === id);
+            document.getElementById('asgnId').value = a.id;
+            document.getElementById('asgnTitle').value = a.title;
+            document.getElementById('asgnDesc').value = a.description;
+            document.getElementById('asgnMaxMarks').value = a.maximumMarks;
+        } else {
+            document.getElementById('asgnId').value = '';
+            document.getElementById('asgnTitle').value = '';
+            document.getElementById('asgnDesc').value = '';
+        }
+        document.getElementById('assignmentModal').classList.remove('hidden');
+    }
+
+    async function saveAssignment(e) {
+        e.preventDefault();
+        const id = document.getElementById('asgnId').value;
+        const payload = {
+            title: document.getElementById('asgnTitle').value,
+            description: document.getElementById('asgnDesc').value,
+            subjectId: Number(document.getElementById('asgnSubjectId').value),
+            deadline: new Date(document.getElementById('asgnDeadline').value || Date.now() + 7*86400000).toISOString(),
+            maximumMarks: Number(document.getElementById('asgnMaxMarks').value),
+            isDraft: document.getElementById('asgnIsDraft').checked
+        };
+
+        const res = await apiFetch(id ? `/api/assignments/${id}` : '/api/assignments', {
+            method: id ? 'PUT' : 'POST',
+            body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+            closeModal('assignmentModal');
+            loadDashboardData();
+            switchTab('assignments');
+        }
+    }
+
+    function openSubmissionModal(assignmentId) {
+        document.getElementById('subAsgnId').value = assignmentId;
+        document.getElementById('submissionModal').classList.remove('hidden');
+    }
+
+    async function saveSubmission(e) {
+        e.preventDefault();
+        const payload = {
+            assignmentId: Number(document.getElementById('subAsgnId').value),
+            answerContent: document.getElementById('subAnswerContent').value,
+            attachmentUrl: document.getElementById('subAttachmentUrl').value || null
+        };
+        const res = await apiFetch('/api/submissions', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+            closeModal('submissionModal');
+            loadDashboardData();
+            switchTab('assignments');
+        }
+    }
+
+    function openGradeModal(id, studentName, answer, maxMarks) {
+        document.getElementById('gradeSubId').value = id;
+        document.getElementById('gradeStudentInfo').innerText = studentName;
+        document.getElementById('gradeAnswerPreview').innerText = answer;
+        document.getElementById('gradeMarks').value = maxMarks;
+        document.getElementById('gradeModal').classList.remove('hidden');
+    }
+
+    async function saveGrade(e) {
+        e.preventDefault();
+        const id = document.getElementById('gradeSubId').value;
+        const payload = {
+            marksAwarded: Number(document.getElementById('gradeMarks').value),
+            feedback: document.getElementById('gradeFeedback').value,
+            status: Number(document.getElementById('gradeStatus').value)
+        };
+        const res = await apiFetch(`/api/submissions/${id}/grade`, {
+            method: 'PUT',
+            body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+            closeModal('gradeModal');
+            loadSubmissions();
+        }
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).classList.add('hidden');
+    }
+
+    // Auto-init on page load
+    window.addEventListener('DOMContentLoaded', () => {
+        renderPortal();
+    });
+</script>
+}

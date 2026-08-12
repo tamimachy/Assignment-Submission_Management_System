@@ -1,23 +1,25 @@
-﻿using static Assignment_Submission_Management_System.Models.AssignSubject;
+using System.Text.Json.Serialization;
 
 namespace Assignment_Submission_Management_System.Models
 {
     public class Assignment
     {
         public int Id { get; set; }
-        public string Title { get; set; }
-        public string Description { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
         public DateTime Deadline { get; set; }
         public int MaximumMarks { get; set; }
-        public bool IsDraft { get; set; } // Allows keeping it as a draft before publishing
+        public bool IsDraft { get; set; } = false; // Allows draft vs published state
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         // Foreign Keys
         public int SubjectId { get; set; }
-        public Subject Subject { get; set; }
+        public Subject? Subject { get; set; }
 
         public int TeacherId { get; set; }
-        public User Teacher { get; set; }
+        public User? Teacher { get; set; }
 
-        public ICollection<Submission> Submissions { get; set; }
+        [JsonIgnore]
+        public ICollection<Submission> Submissions { get; set; } = new List<Submission>();
     }
 }
