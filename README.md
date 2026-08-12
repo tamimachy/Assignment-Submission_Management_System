@@ -1,4 +1,4 @@
-# Assignment & Submission Management System
+<img width="1364" height="767" alt="image" src="https://github.com/user-attachments/assets/bb75eb96-a0db-4b87-a4c7-7e32216d0e59" /># Assignment & Submission Management System
 
 A unified C# ASP.NET Core Web Application combining REST APIs, EF Core Database Persistence, and HTML/Razor Views for a role-based school/college assignment portal.
 
@@ -23,7 +23,7 @@ dotnet run
 ```
 
 ### 2. Open in Browser
-👉 **[http://localhost:5000](http://localhost:5233)** (or `https://localhost:5001`)
+👉 **[http://localhost:5000](http://localhost:5233)** (or `https://localhost:5000`)
 
 > 💡 **Automatic Database Setup**: The application automatically creates and seeds the SQLite database (`assignment_mgmt.db`) with working demo data on launch.
 
