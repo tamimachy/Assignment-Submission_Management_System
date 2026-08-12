@@ -1,4 +1,4 @@
-<img width="1364" height="767" alt="image" src="https://github.com/user-attachments/assets/f49e348f-aab9-43d9-807a-680bb783e4a3" /># Assignment & Submission Management System
+# Assignment & Submission Management System
 
 A unified C# ASP.NET Core Web Application combining REST APIs, EF Core Database Persistence, and HTML/Razor Views for a role-based school/college assignment portal.
 
