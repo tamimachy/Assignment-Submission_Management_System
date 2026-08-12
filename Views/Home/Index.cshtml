@@ -123,20 +123,47 @@
             <div class="flex-1 space-y-6">
                 <!-- TAB 1: OVERVIEW -->
                 <div id="tab-overview" class="tab-pane space-y-6">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h2 class="text-2xl font-extrabold text-white tracking-tight" id="welcomeTitle">Welcome Back!</h2>
-                            <p class="text-xs text-slate-400 mt-1">System dashboard metrics and activity overview.</p>
+                    <!-- DASHBOARD METRICS SECTION (Admin Only) -->
+                    <div id="adminMetricsSection" class="space-y-6 hidden">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h2 class="text-2xl font-extrabold text-white tracking-tight" id="welcomeTitle">Welcome Back!</h2>
+                                <p class="text-xs text-slate-400 mt-1">System dashboard metrics and activity overview.</p>
+                            </div>
+                            <button onclick="loadDashboardData()" class="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white">
+                                <i class="fa-solid fa-arrows-rotate"></i>
+                            </button>
                         </div>
-                        <button onclick="loadDashboardData()" class="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white">
-                            <i class="fa-solid fa-arrows-rotate"></i>
-                        </button>
+
+                        <!-- METRICS GRID -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="statsGrid">
+                            <!-- Populated by JS -->
+                        </div>
                     </div>
 
-                    <!-- METRICS GRID -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="statsGrid">
-                        <!-- Populated by JS -->
+                    <!-- TEACHER COURSES & SUBJECTS SECTION (Teacher Only) -->
+                    <div id="teacherCoursesSection" class="space-y-4 hidden">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h2 class="text-2xl font-extrabold text-white tracking-tight">Teacher Overview</h2>
+                                <p class="text-xs text-slate-400 mt-1">Your assigned academic courses and teaching subjects.</p>
+                            </div>
+                        </div>
+                        <div class="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 shadow-xl space-y-4">
+                            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                                <h3 class="text-base font-extrabold text-white flex items-center gap-2">
+                                    <i class="fa-solid fa-book-bookmark text-amber-400"></i> My Assigned Courses & Subjects
+                                </h3>
+                                <span class="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                                    Teacher View
+                                </span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="teacherCoursesGrid">
+                                <!-- Populated by JS -->
+                            </div>
+                        </div>
                     </div>
+
 
                     <!-- RECENT ASSIGNMENTS CARD -->
                     <div class="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 shadow-xl space-y-4">
@@ -322,6 +349,112 @@
                 <button type="submit" class="px-5 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-semibold text-xs">Save Grade</button>
             </div>
         </form>
+<!-- MODAL: ADD / EDIT USER -->
+<div id="userModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg shadow-2xl p-6 space-y-4 text-slate-100">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <h3 class="text-lg font-bold text-white" id="userModalTitle">Add User Account</h3>
+            <button onclick="closeModal('userModal')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <form onsubmit="saveUser(event)" class="space-y-4">
+            <input type="hidden" id="userIdInput" />
+            <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1">Full Name *</label>
+                <input type="text" id="userNameInput" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white" required />
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1">Email Address *</label>
+                <input type="email" id="userEmailInput" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white" required />
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1">Password *</label>
+                <input type="password" id="userPasswordInput" placeholder="••••••••" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white" />
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Role *</label>
+                    <select id="userRoleInput" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white">
+                        <option value="0">Admin</option>
+                        <option value="1">Teacher</option>
+                        <option value="2">Student</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Course Assignment</label>
+                    <select id="userCourseInput" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white">
+                        <option value="">(None)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex justify-end gap-3 pt-3 border-t border-slate-800">
+                <button type="button" onclick="closeModal('userModal')" class="px-4 py-2 text-xs font-semibold text-slate-400">Cancel</button>
+                <button type="submit" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs">Save User Account</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL: ADD / EDIT COURSE -->
+<div id="courseModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg shadow-2xl p-6 space-y-4 text-slate-100">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <h3 class="text-lg font-bold text-white" id="courseModalTitle">Add Academic Course</h3>
+            <button onclick="closeModal('courseModal')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <form onsubmit="saveCourse(event)" class="space-y-4">
+            <input type="hidden" id="courseIdInput" />
+            <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1">Course Name *</label>
+                <input type="text" id="courseNameInput" placeholder="e.g. Computer Science & Engineering" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white" required />
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1">Course Code *</label>
+                <input type="text" id="courseCodeInput" placeholder="e.g. CSE-101" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white" required />
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1">Description</label>
+                <textarea id="courseDescInput" rows="3" placeholder="Course description..." class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white"></textarea>
+            </div>
+            <div class="flex justify-end gap-3 pt-3 border-t border-slate-800">
+                <button type="button" onclick="closeModal('courseModal')" class="px-4 py-2 text-xs font-semibold text-slate-400">Cancel</button>
+                <button type="submit" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs">Save Course</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL: ADD / EDIT SUBJECT & ASSIGN TEACHER -->
+<div id="subjectModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg shadow-2xl p-6 space-y-4 text-slate-100">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <h3 class="text-lg font-bold text-white" id="subjectModalTitle">Add Subject & Assign Teacher</h3>
+            <button onclick="closeModal('subjectModal')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <form onsubmit="saveSubject(event)" class="space-y-4">
+            <input type="hidden" id="subjIdInput" />
+            <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1">Subject Name *</label>
+                <input type="text" id="subjNameInput" placeholder="e.g. Object Oriented Programming" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white" required />
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1">Subject Code *</label>
+                <input type="text" id="subjCodeInput" placeholder="e.g. CSE-201" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white" required />
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1">Course *</label>
+                <select id="subjCourseInput" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white" required></select>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1">Assign Teacher</label>
+                <select id="subjTeacherInput" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white">
+                    <option value="">(Unassigned)</option>
+                </select>
+            </div>
+            <div class="flex justify-end gap-3 pt-3 border-t border-slate-800">
+                <button type="button" onclick="closeModal('subjectModal')" class="px-4 py-2 text-xs font-semibold text-slate-400">Cancel</button>
+                <button type="submit" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs">Save Subject</button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -343,7 +476,6 @@
     function setDemoLogin(email, password) {
         document.getElementById('loginEmail').value = email;
         document.getElementById('loginPassword').value = password;
-        handleLogin();
     }
 
     async function handleLogin(e) {
@@ -442,10 +574,34 @@
             else btnCreate.classList.add('hidden');
         }
 
+        const courseAdminBtns = document.getElementById('courseAdminBtns');
+        if (courseAdminBtns) {
+            if (isAdmin) {
+                courseAdminBtns.innerHTML = `
+                    <button onclick="openCourseModal()" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs shadow-md">+ Add Course</button>
+                    <button onclick="openSubjectModal()" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-indigo-300 font-semibold text-xs border border-slate-700">+ Add Subject & Assign Teacher</button>
+                `;
+            } else {
+                courseAdminBtns.innerHTML = '';
+            }
+        }
+
         const navUsers = document.getElementById('nav-users');
         if (navUsers) {
             if (isAdmin) navUsers.classList.remove('hidden');
             else navUsers.classList.add('hidden');
+        }
+
+        const adminMetricsSec = document.getElementById('adminMetricsSection');
+        if (adminMetricsSec) {
+            if (isAdmin) adminMetricsSec.classList.remove('hidden');
+            else adminMetricsSec.classList.add('hidden');
+        }
+
+        const teacherSec = document.getElementById('teacherCoursesSection');
+        if (teacherSec) {
+            if (isTeacher) teacherSec.classList.remove('hidden');
+            else teacherSec.classList.add('hidden');
         }
 
         loadDashboardData();
@@ -488,27 +644,89 @@
 
     async function loadDashboardData() {
         try {
-            const statsRes = await apiFetch('/api/dashboard/stats');
-            if (statsRes.ok) {
-                const s = await statsRes.json();
-                document.getElementById('statsGrid').innerHTML = `
-                    <div class="p-5 rounded-2xl bg-slate-900 border border-indigo-500/20 shadow-xl">
-                        <span class="text-xs font-semibold text-indigo-400 uppercase">Assignments</span>
-                        <p class="text-3xl font-extrabold text-white mt-2">${s.totalAssignments}</p>
-                    </div>
-                    <div class="p-5 rounded-2xl bg-slate-900 border border-amber-500/20 shadow-xl">
-                        <span class="text-xs font-semibold text-amber-400 uppercase">Submissions</span>
-                        <p class="text-3xl font-extrabold text-white mt-2">${s.totalSubmissions}</p>
-                    </div>
-                    <div class="p-5 rounded-2xl bg-slate-900 border border-emerald-500/20 shadow-xl">
-                        <span class="text-xs font-semibold text-emerald-400 uppercase">Average Score</span>
-                        <p class="text-3xl font-extrabold text-white mt-2">${s.averageClassScore}</p>
-                    </div>
-                    <div class="p-5 rounded-2xl bg-slate-900 border border-violet-500/20 shadow-xl">
-                        <span class="text-xs font-semibold text-violet-400 uppercase">Users / Courses</span>
-                        <p class="text-3xl font-extrabold text-white mt-2">${s.totalUsers} / ${s.totalCourses}</p>
-                    </div>
-                `;
+            const roleStr = (currentUser && currentUser.role !== undefined && currentUser.role !== null) ? currentUser.role.toString() : '';
+            const isAdmin = roleStr === 'Admin' || roleStr === '0';
+            const isTeacher = roleStr === 'Teacher' || roleStr === '1';
+
+            const adminMetricsSec = document.getElementById('adminMetricsSection');
+            if (adminMetricsSec) {
+                if (isAdmin) adminMetricsSec.classList.remove('hidden');
+                else adminMetricsSec.classList.add('hidden');
+            }
+
+            const teacherSec = document.getElementById('teacherCoursesSection');
+            if (teacherSec) {
+                if (isTeacher) teacherSec.classList.remove('hidden');
+                else teacherSec.classList.add('hidden');
+            }
+
+            if (isAdmin) {
+                const statsRes = await apiFetch('/api/dashboard/stats');
+                if (statsRes.ok) {
+                    const s = await statsRes.json();
+                    document.getElementById('statsGrid').innerHTML = `
+                        <div class="p-5 rounded-2xl bg-slate-900 border border-indigo-500/20 shadow-xl">
+                            <span class="text-xs font-semibold text-indigo-400 uppercase">Assignments</span>
+                            <p class="text-3xl font-extrabold text-white mt-2">${s.totalAssignments}</p>
+                        </div>
+                        <div class="p-5 rounded-2xl bg-slate-900 border border-amber-500/20 shadow-xl">
+                            <span class="text-xs font-semibold text-amber-400 uppercase">Submissions</span>
+                            <p class="text-3xl font-extrabold text-white mt-2">${s.totalSubmissions}</p>
+                        </div>
+                        <div class="p-5 rounded-2xl bg-slate-900 border border-emerald-500/20 shadow-xl">
+                            <span class="text-xs font-semibold text-emerald-400 uppercase">Average Score</span>
+                            <p class="text-3xl font-extrabold text-white mt-2">${s.averageClassScore}</p>
+                        </div>
+                        <div class="p-5 rounded-2xl bg-slate-900 border border-violet-500/20 shadow-xl">
+                            <span class="text-xs font-semibold text-violet-400 uppercase">Users / Courses</span>
+                            <p class="text-3xl font-extrabold text-white mt-2">${s.totalUsers} / ${s.totalCourses}</p>
+                        </div>
+                    `;
+                }
+            }
+
+            if (isTeacher) {
+                try {
+                    const subjRes = await apiFetch('/api/courses/subjects?teacherId=' + currentUser.id);
+                    let mySubjects = [];
+                    if (subjRes.ok) {
+                        mySubjects = await subjRes.json();
+                    }
+                    const grid = document.getElementById('teacherCoursesGrid');
+                    if (grid) {
+                        if (mySubjects && mySubjects.length > 0) {
+                            grid.innerHTML = mySubjects.map(s => `
+                                <div class="p-4 rounded-xl bg-slate-800/60 border border-slate-700/60 space-y-2">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">${s.code || 'Subject'}</span>
+                                        <span class="text-xs font-semibold text-indigo-400">${s.courseName || ''}</span>
+                                    </div>
+                                    <h4 class="text-sm font-bold text-white">${s.name}</h4>
+                                    <p class="text-xs text-slate-400 flex items-center gap-1.5 pt-1">
+                                        <i class="fa-solid fa-graduation-cap text-amber-400 text-xs"></i>
+                                        <span>Course: <strong class="text-slate-200">${s.courseName || 'General'}</strong></span>
+                                    </p>
+                                </div>
+                            `).join('');
+                        } else if (currentUser.courseName) {
+                            grid.innerHTML = `
+                                <div class="p-4 rounded-xl bg-slate-800/60 border border-slate-700/60 space-y-2 col-span-full">
+                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">Assigned Department</span>
+                                    <h4 class="text-sm font-bold text-white">${currentUser.courseName}</h4>
+                                    <p class="text-xs text-slate-400">Assigned Course / Department: ${currentUser.courseName}</p>
+                                </div>
+                            `;
+                        } else {
+                            grid.innerHTML = `
+                                <div class="p-4 rounded-xl bg-slate-800/40 border border-slate-800 text-slate-400 text-xs col-span-full italic">
+                                    No subjects or courses currently assigned to your account.
+                                </div>
+                            `;
+                        }
+                    }
+                } catch (err) {
+                    console.error('Error loading teacher courses:', err);
+                }
             }
 
             const asgnRes = await apiFetch('/api/assignments');
@@ -532,30 +750,62 @@
         }
     }
 
+    var coursesCache = [];
+    var teachersCache = [];
+
     async function loadAssignments() {
         const list = document.getElementById('assignmentsList');
         const roleStr = currentUser.role.toString();
+        const isAdmin = roleStr === 'Admin' || roleStr === '0';
+        const isTeacher = roleStr === 'Teacher' || roleStr === '1';
         const isStudent = roleStr === 'Student' || roleStr === '2';
+
+        if (!assignmentsCache || assignmentsCache.length === 0) {
+            list.innerHTML = `<div class="p-8 text-center text-slate-400 bg-slate-900/50 rounded-2xl border border-slate-800">No assignments available.</div>`;
+            return;
+        }
 
         list.innerHTML = assignmentsCache.map(a => {
             const isClosed = new Date() > new Date(a.deadline);
             const mySub = a.mySubmission;
+            const statusBadge = a.isDraft 
+                ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">Draft</span>`
+                : `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Published</span>`;
+
             return `
-                <div class="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 flex flex-col md:flex-row justify-between gap-4">
+                <div class="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 flex flex-col md:flex-row justify-between gap-4 shadow-lg hover:border-slate-700 transition-all">
                     <div class="space-y-2 flex-1">
-                        <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">${a.subjectName}</span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">${a.subjectName || 'Subject'}</span>
+                            ${statusBadge}
+                        </div>
                         <h3 class="text-base font-bold text-white">${a.title}</h3>
                         <p class="text-xs text-slate-300 whitespace-pre-wrap">${a.description}</p>
-                        <div class="text-xs text-slate-400 pt-1">Deadline: ${new Date(a.deadline).toLocaleString()} | Max Marks: <strong class="text-amber-400">${a.maximumMarks}</strong></div>
+                        <div class="text-xs text-slate-400 pt-1 flex items-center gap-4">
+                            <span><i class="fa-regular fa-clock me-1 text-slate-500"></i>Deadline: <strong class="text-slate-200">${new Date(a.deadline).toLocaleString()}</strong></span>
+                            <span><i class="fa-solid fa-award me-1 text-amber-500"></i>Max Marks: <strong class="text-amber-400">${a.maximumMarks}</strong></span>
+                        </div>
                     </div>
-                    <div class="flex flex-col justify-center items-end gap-2">
+                    <div class="flex flex-col justify-center items-end gap-2 border-t md:border-t-0 md:border-l border-slate-800/80 pt-3 md:pt-0 md:pl-4">
                         ${isStudent ? `
-                            ${mySub ? `<span class="text-xs font-bold text-emerald-400">${mySub.status} (${mySub.marksAwarded ?? '-'} / ${a.maximumMarks})</span>` : ''}
-                            <button onclick="openSubmissionModal(${a.id})" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs">
-                                ${mySub ? 'Update Solution' : 'Submit Answer'}
+                            ${mySub ? `
+                                <div class="text-right">
+                                    <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 block">${mySub.status}</span>
+                                    <span class="text-[11px] text-slate-400 mt-1 block">Marks: <strong class="text-amber-400">${mySub.marksAwarded ?? '-'} / ${a.maximumMarks}</strong></span>
+                                </div>
+                            ` : ''}
+                            <button onclick="openSubmissionModal(${a.id})" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs shadow-md shadow-emerald-600/20 transition-all">
+                                <i class="fa-solid fa-paper-plane me-1"></i> ${mySub ? 'Update Solution' : 'Submit Answer'}
                             </button>
                         ` : `
-                            <button onclick="openAssignmentModal(${a.id})" class="px-3 py-1.5 rounded-lg bg-slate-800 text-xs text-slate-300 hover:text-white">Edit</button>
+                            <div class="flex items-center gap-2">
+                                <button onclick="openAssignmentModal(${a.id})" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs text-indigo-300 font-semibold border border-slate-700 transition-all">
+                                    <i class="fa-solid fa-pen-to-square me-1"></i> Edit
+                                </button>
+                                <button onclick="deleteAssignment(${a.id})" class="px-3 py-1.5 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 text-xs text-rose-400 font-semibold border border-rose-900/40 transition-all">
+                                    <i class="fa-solid fa-trash me-1"></i> Delete
+                                </button>
+                            </div>
                         `}
                     </div>
                 </div>
@@ -571,19 +821,48 @@
             const roleStr = currentUser.role.toString();
             const isStudent = roleStr === 'Student' || roleStr === '2';
 
+            if (!subs || subs.length === 0) {
+                list.innerHTML = `<div class="p-8 text-center text-slate-400 bg-slate-900/50 rounded-2xl border border-slate-800">No student submissions recorded yet.</div>`;
+                return;
+            }
+
             list.innerHTML = subs.map(s => `
-                <div class="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-3">
-                    <div class="flex justify-between border-b border-slate-800 pb-2">
+                <div class="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-3 shadow-lg">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-800/80 pb-3">
                         <div>
-                            <h4 class="text-sm font-bold text-white">${s.studentName}</h4>
-                            <p class="text-xs text-indigo-400">${s.assignmentTitle}</p>
+                            <h4 class="text-sm font-bold text-white flex items-center gap-2">
+                                <i class="fa-solid fa-user-graduate text-indigo-400"></i> ${s.studentName}
+                                <span class="text-xs font-normal text-slate-400">(${s.studentEmail})</span>
+                            </h4>
+                            <p class="text-xs text-indigo-400 font-semibold mt-0.5">${s.assignmentTitle}</p>
                         </div>
-                        <span class="text-xs font-bold text-amber-400">${s.status} ${s.marksAwarded != null ? `(${s.marksAwarded}/${s.maximumMarks})` : ''}</span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold px-3 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                                ${s.status} ${s.marksAwarded != null ? `(${s.marksAwarded} / ${s.maximumMarks})` : `(Max ${s.maximumMarks})`}
+                            </span>
+                        </div>
                     </div>
-                    <div class="p-3 rounded-xl bg-slate-800/60 text-xs font-mono text-slate-200">${s.answerContent}</div>
+                    <div class="space-y-1">
+                        <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Student Solution:</span>
+                        <div class="p-3 rounded-xl bg-slate-950/80 text-xs font-mono text-slate-200 border border-slate-800 whitespace-pre-wrap">${s.answerContent}</div>
+                    </div>
+                    ${s.attachmentUrl ? `
+                        <div class="text-xs text-slate-300">
+                            <i class="fa-solid fa-link text-indigo-400 me-1"></i> Attachment / Repo: 
+                            <a href="${s.attachmentUrl}" target="_blank" class="text-indigo-400 hover:underline font-mono">${s.attachmentUrl}</a>
+                        </div>
+                    ` : ''}
+                    ${s.feedback ? `
+                        <div class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-300 space-y-1">
+                            <span class="font-bold text-amber-400 block"><i class="fa-solid fa-comment-dots me-1"></i> Teacher Feedback:</span>
+                            <p class="whitespace-pre-wrap">${s.feedback}</p>
+                        </div>
+                    ` : ''}
                     ${!isStudent ? `
-                        <div class="flex justify-end">
-                            <button onclick="openGradeModal(${s.id}, '${s.studentName}', '${s.answerContent}', ${s.maximumMarks})" class="px-4 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold">Grade Submission</button>
+                        <div class="flex justify-end pt-2">
+                            <button onclick="openGradeModal(${s.id}, '${s.studentName}', '${s.answerContent.replace(/'/g, "\\'")}', ${s.maximumMarks})" class="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold shadow-md shadow-amber-600/20 transition-all">
+                                <i class="fa-solid fa-pen-nib me-1"></i> Grade & Provide Feedback
+                            </button>
                         </div>
                     ` : ''}
                 </div>
@@ -595,10 +874,70 @@
         const res = await apiFetch('/api/courses');
         if (res.ok) {
             const courses = await res.json();
+            const roleStr = currentUser.role.toString();
+            const isAdmin = roleStr === 'Admin' || roleStr === '0';
+
+            if (!courses || courses.length === 0) {
+                document.getElementById('coursesList').innerHTML = `<div class="p-8 text-center text-slate-400 bg-slate-900/50 rounded-2xl border border-slate-800">No academic courses registered yet.</div>`;
+                return;
+            }
+
             document.getElementById('coursesList').innerHTML = courses.map(c => `
-                <div class="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-3">
-                    <h3 class="text-base font-bold text-white">${c.name} (${c.code})</h3>
-                    <p class="text-xs text-slate-400">${c.description || ''}</p>
+                <div class="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-4 shadow-lg">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800/80 pb-3">
+                        <div>
+                            <h3 class="text-base font-bold text-white flex items-center gap-2">
+                                <i class="fa-solid fa-book-open text-indigo-400"></i> ${c.name} 
+                                <span class="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 font-mono">${c.code}</span>
+                            </h3>
+                            <p class="text-xs text-slate-400 mt-1">${c.description || 'No course description provided.'}</p>
+                        </div>
+                        ${isAdmin ? `
+                            <div class="flex items-center gap-2">
+                                <button onclick="openCourseModal(${c.id})" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs text-indigo-300 font-semibold border border-slate-700 transition-all">
+                                    <i class="fa-solid fa-pen-to-square me-1"></i> Edit Course
+                                </button>
+                                <button onclick="deleteCourse(${c.id})" class="px-3 py-1.5 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 text-xs text-rose-400 font-semibold border border-rose-900/40 transition-all">
+                                    <i class="fa-solid fa-trash me-1"></i> Delete Course
+                                </button>
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Assigned Subjects & Teachers:</h4>
+                            ${isAdmin ? `
+                                <button onclick="openSubjectModal(null, ${c.id})" class="px-2.5 py-1 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 text-xs font-semibold border border-indigo-500/20 transition-all">
+                                    <i class="fa-solid fa-plus me-1"></i> Add Subject
+                                </button>
+                            ` : ''}
+                        </div>
+                        ${c.subjects && c.subjects.length > 0 ? `
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                ${c.subjects.map(s => `
+                                    <div class="p-3 rounded-xl bg-slate-800/60 border border-slate-700/60 flex items-center justify-between text-xs gap-2">
+                                        <div>
+                                            <span class="font-bold text-white block">${s.name} (${s.code})</span>
+                                            <span class="text-slate-400 block text-[11px]">Teacher: <strong class="text-indigo-400">${s.teacherName || 'Unassigned'}</strong></span>
+                                        </div>
+                                        ${isAdmin ? `
+                                            <div class="flex items-center gap-1.5">
+                                                <button onclick="openSubjectModal(${s.id})" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-indigo-300 font-semibold border border-slate-700 transition-all" title="Edit Subject">
+                                                    <i class="fa-solid fa-pen-to-square"></i> Edit
+                                                </button>
+                                                <button onclick="deleteSubject(${s.id})" class="px-2.5 py-1 rounded-lg bg-rose-950/40 hover:bg-rose-900/60 text-xs text-rose-400 font-semibold border border-rose-900/40 transition-all" title="Delete Subject">
+                                                    <i class="fa-solid fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        ` : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : `
+                            <p class="text-xs text-slate-500 italic">No subjects added to this course yet.</p>
+                        `}
+                    </div>
                 </div>
             `).join('');
         }
@@ -608,15 +947,232 @@
         const res = await apiFetch('/api/users');
         if (res.ok) {
             const users = await res.json();
+            const roleStr = currentUser.role.toString();
+            const isAdmin = roleStr === 'Admin' || roleStr === '0';
+
             document.getElementById('usersTableBody').innerHTML = users.map(u => `
-                <tr class="hover:bg-slate-800/40">
+                <tr class="hover:bg-slate-800/40 transition-colors">
                     <td class="p-4 font-bold text-white">${u.name}</td>
                     <td class="p-4 text-slate-400">${u.email}</td>
-                    <td class="p-4"><span class="px-2 py-0.5 rounded-full text-[10px] bg-indigo-500/10 text-indigo-400">${u.role}</span></td>
+                    <td class="p-4">
+                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${u.role === 'Admin' ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20' : u.role === 'Teacher' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'}">
+                            ${u.role}
+                        </span>
+                    </td>
                     <td class="p-4 text-slate-400">${u.courseName || 'N/A'}</td>
-                    <td class="p-4 text-right">--</td>
+                    <td class="p-4 text-right">
+                        ${isAdmin ? `
+                            <button onclick="openUserModal(${u.id})" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-indigo-300 me-2 font-semibold border border-slate-700">
+                                Edit
+                            </button>
+                            <button onclick="deleteUser(${u.id})" class="px-2.5 py-1 rounded-lg bg-rose-950/40 hover:bg-rose-900/60 text-xs text-rose-400 font-semibold border border-rose-900/40">
+                                Delete
+                            </button>
+                        ` : '--'}
+                    </td>
                 </tr>
             `).join('');
+        }
+    }
+
+    // --- MODAL & CRUD HANDLERS ---
+
+    async function openUserModal(id = null) {
+        const courseRes = await apiFetch('/api/courses');
+        if (courseRes.ok) {
+            coursesCache = await courseRes.json();
+            const courseSelect = document.getElementById('userCourseInput');
+            courseSelect.innerHTML = '<option value="">(None)</option>' + coursesCache.map(c => `<option value="${c.id}">${c.name} (${c.code})</option>`).join('');
+        }
+
+        if (id) {
+            document.getElementById('userModalTitle').innerText = 'Edit User Account';
+            const userRes = await apiFetch(`/api/users/${id}`);
+            if (userRes.ok) {
+                const u = await userRes.json();
+                document.getElementById('userIdInput').value = u.id;
+                document.getElementById('userNameInput').value = u.name;
+                document.getElementById('userEmailInput').value = u.email;
+                document.getElementById('userPasswordInput').value = '';
+                document.getElementById('userRoleInput').value = u.role === 'Admin' || u.role === 0 ? 0 : u.role === 'Teacher' || u.role === 1 ? 1 : 2;
+                document.getElementById('userCourseInput').value = u.courseId || '';
+            }
+        } else {
+            document.getElementById('userModalTitle').innerText = 'Add User Account';
+            document.getElementById('userIdInput').value = '';
+            document.getElementById('userNameInput').value = '';
+            document.getElementById('userEmailInput').value = '';
+            document.getElementById('userPasswordInput').value = '';
+            document.getElementById('userRoleInput').value = '2';
+            document.getElementById('userCourseInput').value = '';
+        }
+        document.getElementById('userModal').classList.remove('hidden');
+    }
+
+    async function saveUser(e) {
+        e.preventDefault();
+        const id = document.getElementById('userIdInput').value;
+        const payload = {
+            name: document.getElementById('userNameInput').value,
+            email: document.getElementById('userEmailInput').value,
+            password: document.getElementById('userPasswordInput').value || 'Password123!',
+            role: Number(document.getElementById('userRoleInput').value),
+            courseId: document.getElementById('userCourseInput').value ? Number(document.getElementById('userCourseInput').value) : null
+        };
+
+        const res = await apiFetch(id ? `/api/users/${id}` : '/api/users', {
+            method: id ? 'PUT' : 'POST',
+            body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+            closeModal('userModal');
+            loadUsers();
+            loadDashboardData();
+        } else {
+            let errText = 'Failed to save user';
+            try { errText = (await res.json()).message || errText; } catch {}
+            alert(errText);
+        }
+    }
+
+    async function deleteUser(id) {
+        if (!confirm('Are you sure you want to delete this user?')) return;
+        const res = await apiFetch(`/api/users/${id}`, { method: 'DELETE' });
+        if (res.ok) {
+            loadUsers();
+            loadDashboardData();
+        }
+    }
+
+    async function openCourseModal(id = null) {
+        if (id) {
+            document.getElementById('courseModalTitle').innerText = 'Edit Academic Course';
+            const res = await apiFetch(`/api/courses/${id}`);
+            if (res.ok) {
+                const c = await res.json();
+                document.getElementById('courseIdInput').value = c.id;
+                document.getElementById('courseNameInput').value = c.name;
+                document.getElementById('courseCodeInput').value = c.code;
+                document.getElementById('courseDescInput').value = c.description || '';
+            }
+        } else {
+            document.getElementById('courseModalTitle').innerText = 'Add Academic Course';
+            document.getElementById('courseIdInput').value = '';
+            document.getElementById('courseNameInput').value = '';
+            document.getElementById('courseCodeInput').value = '';
+            document.getElementById('courseDescInput').value = '';
+        }
+        document.getElementById('courseModal').classList.remove('hidden');
+    }
+
+    async function saveCourse(e) {
+        e.preventDefault();
+        const id = document.getElementById('courseIdInput').value;
+        const payload = {
+            name: document.getElementById('courseNameInput').value,
+            code: document.getElementById('courseCodeInput').value,
+            description: document.getElementById('courseDescInput').value
+        };
+        const url = id ? `/api/courses/${id}` : '/api/courses';
+        const method = id ? 'PUT' : 'POST';
+        const res = await apiFetch(url, {
+            method: method,
+            body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+            closeModal('courseModal');
+            loadCourses();
+            loadDashboardData();
+        } else {
+            let errText = 'Failed to save course';
+            try { errText = (await res.json()).message || errText; } catch {}
+            alert(errText);
+        }
+    }
+
+    async function deleteCourse(id) {
+        if (!confirm('Are you sure you want to delete this course?')) return;
+        const res = await apiFetch(`/api/courses/${id}`, { method: 'DELETE' });
+        if (res.ok) {
+            loadCourses();
+            loadDashboardData();
+        }
+    }
+
+    async function openSubjectModal(id = null, presetCourseId = null) {
+        const courseRes = await apiFetch('/api/courses');
+        if (courseRes.ok) {
+            coursesCache = await courseRes.json();
+            const courseSelect = document.getElementById('subjCourseInput');
+            courseSelect.innerHTML = coursesCache.map(c => `<option value="${c.id}">${c.name} (${c.code})</option>`).join('');
+        }
+
+        const teacherRes = await apiFetch('/api/users?role=1');
+        if (teacherRes.ok) {
+            teachersCache = await teacherRes.json();
+            const teacherSelect = document.getElementById('subjTeacherInput');
+            teacherSelect.innerHTML = '<option value="">(Unassigned)</option>' + teachersCache.map(t => `<option value="${t.id}">${t.name} (${t.email})</option>`).join('');
+        }
+
+        if (id) {
+            document.getElementById('subjectModalTitle').innerText = 'Edit Subject & Assign Teacher';
+            const subjRes = await apiFetch('/api/courses/subjects');
+            if (subjRes.ok) {
+                const subjects = await subjRes.json();
+                const s = subjects.find(x => x.id === id);
+                if (s) {
+                    document.getElementById('subjIdInput').value = s.id;
+                    document.getElementById('subjNameInput').value = s.name;
+                    document.getElementById('subjCodeInput').value = s.code;
+                    document.getElementById('subjCourseInput').value = s.courseId;
+                    document.getElementById('subjTeacherInput').value = s.teacherId || '';
+                }
+            }
+        } else {
+            document.getElementById('subjectModalTitle').innerText = 'Add Subject & Assign Teacher';
+            document.getElementById('subjIdInput').value = '';
+            document.getElementById('subjNameInput').value = '';
+            document.getElementById('subjCodeInput').value = '';
+            if (presetCourseId) {
+                document.getElementById('subjCourseInput').value = presetCourseId;
+            }
+            document.getElementById('subjTeacherInput').value = '';
+        }
+
+        document.getElementById('subjectModal').classList.remove('hidden');
+    }
+
+    async function saveSubject(e) {
+        e.preventDefault();
+        const id = document.getElementById('subjIdInput').value;
+        const payload = {
+            name: document.getElementById('subjNameInput').value,
+            code: document.getElementById('subjCodeInput').value,
+            courseId: Number(document.getElementById('subjCourseInput').value),
+            teacherId: document.getElementById('subjTeacherInput').value ? Number(document.getElementById('subjTeacherInput').value) : null
+        };
+        const url = id ? `/api/courses/subjects/${id}` : '/api/courses/subjects';
+        const method = id ? 'PUT' : 'POST';
+        const res = await apiFetch(url, {
+            method: method,
+            body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+            closeModal('subjectModal');
+            loadCourses();
+        } else {
+            let errText = 'Failed to save subject';
+            try { errText = (await res.json()).message || errText; } catch {}
+            alert(errText);
+        }
+    }
+
+    async function deleteSubject(id) {
+        if (!confirm('Are you sure you want to delete this subject?')) return;
+        const res = await apiFetch(`/api/courses/subjects/${id}`, { method: 'DELETE' });
+        if (res.ok) {
+            loadCourses();
         }
     }
 
@@ -659,6 +1215,15 @@
             closeModal('assignmentModal');
             loadDashboardData();
             switchTab('assignments');
+        }
+    }
+
+    async function deleteAssignment(id) {
+        if (!confirm('Are you sure you want to delete this assignment?')) return;
+        const res = await apiFetch(`/api/assignments/${id}`, { method: 'DELETE' });
+        if (res.ok) {
+            loadDashboardData();
+            loadAssignments();
         }
     }
 

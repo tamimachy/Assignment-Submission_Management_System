@@ -33,11 +33,12 @@ namespace Assignment_Submission_Management_System.Controllers.Api
             var pendingGrading = await _context.Submissions.CountAsync(s => s.Status == SubmissionStatus.Submitted || s.Status == SubmissionStatus.Late);
             var gradedCount = await _context.Submissions.CountAsync(s => s.Status == SubmissionStatus.Graded);
 
-            var avgScore = await _context.Submissions
+            var gradedMarks = await _context.Submissions
                 .Where(s => s.MarksAwarded.HasValue)
-                .Select(s => s.MarksAwarded!.Value)
-                .DefaultIfEmpty(0)
-                .AverageAsync();
+                .Select(s => (double)s.MarksAwarded!.Value)
+                .ToListAsync();
+
+            var avgScore = gradedMarks.Any() ? Math.Round(gradedMarks.Average(), 2) : 0;
 
             var stats = new DashboardStatsDto
             {

@@ -22,33 +22,34 @@ namespace Assignment_Submission_Management_System.Controllers.Api
         [HttpGet]
         public async Task<IActionResult> GetCourses()
         {
-            var courses = await _context.Courses
+            var coursesList = await _context.Courses
                 .Include(c => c.Subjects)
                     .ThenInclude(s => s.Teacher)
                 .Include(c => c.Students)
-                .Select(c => new CourseResponseDto
-                {
-                    Id = c.Id,
-                    Name = c.Name,
-                    Code = c.Code,
-                    Description = c.Description,
-                    CreatedAt = c.CreatedAt,
-                    SubjectsCount = c.Subjects.Count,
-                    StudentsCount = c.Students.Count,
-                    Subjects = c.Subjects.Select(s => new SubjectResponseDto
-                    {
-                        Id = s.Id,
-                        Name = s.Name,
-                        Code = s.Code,
-                        CourseId = s.CourseId,
-                        CourseName = c.Name,
-                        TeacherId = s.TeacherId,
-                        TeacherName = s.Teacher != null ? s.Teacher.Name : null
-                    }).ToList()
-                })
                 .ToListAsync();
 
-            return Ok(courses);
+            var dtos = coursesList.Select(c => new CourseResponseDto
+            {
+                Id = c.Id,
+                Name = c.Name,
+                Code = c.Code,
+                Description = c.Description,
+                CreatedAt = c.CreatedAt,
+                SubjectsCount = c.Subjects.Count,
+                StudentsCount = c.Students.Count,
+                Subjects = c.Subjects.Select(s => new SubjectResponseDto
+                {
+                    Id = s.Id,
+                    Name = s.Name,
+                    Code = s.Code,
+                    CourseId = s.CourseId,
+                    CourseName = c.Name,
+                    TeacherId = s.TeacherId,
+                    TeacherName = s.Teacher != null ? s.Teacher.Name : null
+                }).ToList()
+            }).ToList();
+
+            return Ok(dtos);
         }
 
         [HttpGet("{id}")]
@@ -223,6 +224,18 @@ namespace Assignment_Submission_Management_System.Controllers.Api
             await _context.SaveChangesAsync();
 
             return Ok(new { message = "Teacher assigned successfully" });
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("subjects/{id}")]
+        public async Task<IActionResult> DeleteSubject(int id)
+        {
+            var subject = await _context.Subjects.FindAsync(id);
+            if (subject == null) return NotFound(new { message = "Subject not found" });
+
+            _context.Subjects.Remove(subject);
+            await _context.SaveChangesAsync();
+            return Ok(new { message = "Subject deleted successfully" });
         }
     }
 }
