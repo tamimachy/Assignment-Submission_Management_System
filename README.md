@@ -1,21 +1,34 @@
 # Assignment & Submission Management System
 
-A unified C# ASP.NET Core Web Application combining REST APIs, EF Core Database Persistence, and HTML/Razor Views for a role-based school/college assignment portal.
+A unified C# ASP.NET Core Web Application combining REST APIs, EF Core Database Persistence, and interactive HTML/Razor Views for a role-based school/college assignment portal.
 
 ---
 
-## Overview
+##  Features & Role-Based Workflows
 
-The **Assignment & Submission Management System** is built entirely with C# and ASP.NET Core MVC & Web APIs:
-- **Teachers** can create, publish, or draft assignments, assign them to specific courses and subjects, set deadlines, view student submissions, and award marks with feedback.
-- **Students** can view published assignments for their enrolled course, submit solutions with text and optional repository links before deadlines, track submission status, and review marks and teacher feedback.
-- **Admins** can manage users, courses, subjects, assign teachers to subjects, and view all system activity.
+###  Student Portal
+- **Personalized Overview Dashboard**: Track **Assigned Assignments**, **Completed Assignments**, **Incompleted Assignments**, and **Average Grade Score**.
+- **Instant Assignment Sync**: View published assignments for enrolled courses with real-time deadline status and maximum marks.
+- **Answer Submission & Solution Editing**: Submit solutions with text content and repository links before deadlines. Easily update existing solutions before deadlines without duplicate errors.
+- **Strict Privacy**: Students can only view their own submissions and grades.
+
+###  Teacher Portal
+- **Teacher Metrics Dashboard**: Track **Assigned Assignments**, **Completed Submissions**, **Pending Grading**, and **Average Class Score**.
+- **Course & Subject Management**: View assigned academic courses, departments, and assigned subject lists.
+- **Assignment Creation & Management**: Create, edit, publish, or draft assignments with customizable deadlines and max marks.
+- **Grading & Feedback**: Review student submissions, assign marks, and provide detailed teacher feedback.
+
+###  Admin Portal
+- **System-Wide Dashboard**: Track total assignments, total submissions, overall system average score, and total users/courses count.
+- **User Administration**: Create, edit, and delete user accounts (Admins, Teachers, Students) with course assignments and optional password updates.
+- **Academic Hierarchy Management**: Create academic courses and subjects, and assign teachers to specific subjects.
+- **Courses & Subjects Overview**: View all active courses, enrolled student counts, and assigned faculty directly from the Overview section.
 
 ---
 
 ##  How to Run the Application (Single Command!)
 
-You do **not** need Node.js, `npm`, or XML build scripts. Everything is handled natively by ASP.NET Core!
+You do **not** need Node.js, `npm`, or complex build scripts. Everything is handled natively by ASP.NET Core!
 
 ### 1. Open Terminal in the Root Directory
 ```powershell
@@ -69,18 +82,19 @@ dotnet test Assignment_Submission_Management_System.Tests/Assignment_Submission_
 ├── Controllers/
 │   ├── HomeController.cs             # Serves HTML Views (Index, Privacy)
 │   └── Api/
-│       ├── AssignmentsController.cs  # Assignment CRUD & role filtering REST API
+│       ├── AssignmentsController.cs  # Assignment CRUD, deadline status & role filtering REST API
 │       ├── AuthController.cs         # JWT Login, Register, GetMe REST API
 │       ├── CoursesController.cs      # Courses, Subjects & Teacher assignments REST API
-│       ├── DashboardController.cs    # Aggregate metrics & statistics REST API
-│       ├── SubmissionsController.cs   # Submissions & teacher grading REST API
+│       ├── DashboardController.cs    # Personalized user stats & system metrics REST API
+│       ├── SubmissionsController.cs   # Submissions, student scoping & teacher grading REST API
 │       └── UsersController.cs        # User account management REST API
 ├── Data/
 │   ├── ApplicationDbContext.cs      # EF Core DbContext with model configurations
 │   └── DbInitializer.cs             # Auto-creation & demo data seed initializer
+├── DTOs/                             # Data Transfer Objects (AuthDTOs, AssignmentDTOs, DashboardDTOs)
 ├── Views/
 │   ├── Home/
-│   │   └── Index.cshtml             # Full-stack Portal HTML View
+│   │   └── Index.cshtml             # Full-stack Portal HTML View with real-time UI updates
 │   └── Shared/
 │       └── _Layout.cshtml           # Master Layout template
 ├── Models/                          # Domain models (User, Course, Subject, Assignment, Submission)
