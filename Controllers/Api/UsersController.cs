@@ -104,10 +104,13 @@ namespace Assignment_Submission_Management_System.Controllers.Api
 
         [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUser(int id, [FromBody] RegisterDto dto)
+        public async Task<IActionResult> UpdateUser(int id, [FromBody] UpdateUserDto dto)
         {
             var user = await _context.Users.FindAsync(id);
             if (user == null) return NotFound(new { message = "User not found" });
+
+            var existingEmail = await _context.Users.AnyAsync(u => u.Id != id && u.Email.ToLower() == dto.Email.ToLower());
+            if (existingEmail) return BadRequest(new { message = "User email already exists" });
 
             user.Name = dto.Name;
             user.Email = dto.Email;
@@ -116,6 +119,10 @@ namespace Assignment_Submission_Management_System.Controllers.Api
 
             if (!string.IsNullOrWhiteSpace(dto.Password))
             {
+                if (dto.Password.Length < 6)
+                {
+                    return BadRequest(new { message = "Password must be at least 6 characters long" });
+                }
                 user.PasswordHash = _authService.HashPassword(dto.Password);
             }
 

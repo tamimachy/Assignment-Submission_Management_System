@@ -32,6 +32,23 @@ namespace Assignment_Submission_Management_System.DTOs
         public int? CourseId { get; set; }
     }
 
+    public class UpdateUserDto
+    {
+        [Required]
+        public string Name { get; set; } = string.Empty;
+
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; } = string.Empty;
+
+        public string? Password { get; set; }
+
+        [Required]
+        public UserRole Role { get; set; }
+
+        public int? CourseId { get; set; }
+    }
+
     public class AuthResponseDto
     {
         public string Token { get; set; } = string.Empty;

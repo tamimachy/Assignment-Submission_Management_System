@@ -13,4 +13,18 @@ namespace Assignment_Submission_Management_System.DTOs
         public int GradedSubmissionsCount { get; set; }
         public double AverageClassScore { get; set; }
     }
+
+    public class UserDashboardStatsDto
+    {
+        public int TotalAssignedAssignments { get; set; }
+        public int CompletedAssignments { get; set; }
+        public int IncompletedAssignments { get; set; }
+        public double AverageScore { get; set; }
+        public int PendingGradingCount { get; set; }
+        public int TotalUsers { get; set; }
+        public int TotalCourses { get; set; }
+        public int TotalAssignments { get; set; }
+        public int TotalSubmissions { get; set; }
+        public double AverageClassScore { get; set; }
+    }
 }

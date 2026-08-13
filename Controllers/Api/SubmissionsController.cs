@@ -23,20 +23,23 @@ namespace Assignment_Submission_Management_System.Controllers.Api
         [HttpGet]
         public async Task<IActionResult> GetSubmissions([FromQuery] int? assignmentId = null, [FromQuery] int? studentId = null)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? User.FindFirst("sub")?.Value;
             int.TryParse(userIdClaim, out int userId);
-            var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
+            var userRoleClaim = User.FindFirst(ClaimTypes.Role)?.Value ?? User.FindFirst("role")?.Value ?? string.Empty;
+
+            var isStudent = User.IsInRole("Student") || User.IsInRole("2") || userRoleClaim.Equals("Student", StringComparison.OrdinalIgnoreCase) || userRoleClaim == "2";
+            var isTeacher = User.IsInRole("Teacher") || User.IsInRole("1") || userRoleClaim.Equals("Teacher", StringComparison.OrdinalIgnoreCase) || userRoleClaim == "1";
 
             var query = _context.Submissions
                 .Include(s => s.Assignment)
                 .Include(s => s.Student)
                 .AsQueryable();
 
-            if (userRole == UserRole.Student.ToString())
+            if (isStudent)
             {
                 query = query.Where(s => s.StudentId == userId);
             }
-            else if (userRole == UserRole.Teacher.ToString())
+            else if (isTeacher)
             {
                 query = query.Where(s => s.Assignment.TeacherId == userId || s.Assignment.Subject.TeacherId == userId);
             }
@@ -46,7 +49,7 @@ namespace Assignment_Submission_Management_System.Controllers.Api
                 query = query.Where(s => s.AssignmentId == assignmentId.Value);
             }
 
-            if (studentId.HasValue && userRole != UserRole.Student.ToString())
+            if (studentId.HasValue && !isStudent)
             {
                 query = query.Where(s => s.StudentId == studentId.Value);
             }
@@ -76,9 +79,11 @@ namespace Assignment_Submission_Management_System.Controllers.Api
         [HttpGet("{id}")]
         public async Task<IActionResult> GetSubmission(int id)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? User.FindFirst("sub")?.Value;
             int.TryParse(userIdClaim, out int userId);
-            var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
+            var userRoleClaim = User.FindFirst(ClaimTypes.Role)?.Value ?? User.FindFirst("role")?.Value ?? string.Empty;
+
+            var isStudent = User.IsInRole("Student") || User.IsInRole("2") || userRoleClaim.Equals("Student", StringComparison.OrdinalIgnoreCase) || userRoleClaim == "2";
 
             var s = await _context.Submissions
                 .Include(s => s.Assignment)
@@ -87,7 +92,7 @@ namespace Assignment_Submission_Management_System.Controllers.Api
 
             if (s == null) return NotFound(new { message = "Submission not found" });
 
-            if (userRole == UserRole.Student.ToString() && s.StudentId != userId)
+            if (isStudent && s.StudentId != userId)
             {
                 return Forbid();
             }
@@ -139,7 +144,9 @@ namespace Assignment_Submission_Management_System.Controllers.Api
                 return BadRequest(new { message = "You have already submitted for this assignment. Please edit your submission." });
             }
 
-            var isLate = DateTime.UtcNow > assignment.Deadline;
+            var deadlineUtc = DateTime.SpecifyKind(assignment.Deadline, DateTimeKind.Utc);
+            var nowUtc = DateTime.UtcNow;
+            var isLate = nowUtc > deadlineUtc;
 
             var submission = new Submission
             {
@@ -147,7 +154,7 @@ namespace Assignment_Submission_Management_System.Controllers.Api
                 StudentId = userId,
                 AnswerContent = dto.AnswerContent,
                 AttachmentUrl = dto.AttachmentUrl,
-                SubmittedAt = DateTime.UtcNow,
+                SubmittedAt = nowUtc,
                 Status = isLate ? SubmissionStatus.Late : SubmissionStatus.Submitted
             };
 
@@ -161,7 +168,7 @@ namespace Assignment_Submission_Management_System.Controllers.Api
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateSubmission(int id, [FromBody] UpdateSubmissionDto dto)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? User.FindFirst("sub")?.Value;
             int.TryParse(userIdClaim, out int userId);
 
             var submission = await _context.Submissions
@@ -175,14 +182,23 @@ namespace Assignment_Submission_Management_System.Controllers.Api
                 return Forbid();
             }
 
-            if (DateTime.UtcNow > submission.Assignment.Deadline)
+            var deadlineUtc = DateTime.SpecifyKind(submission.Assignment.Deadline, DateTimeKind.Utc);
+            var nowUtc = DateTime.UtcNow;
+
+            if (nowUtc > deadlineUtc)
             {
                 return BadRequest(new { message = "Cannot edit submission after the deadline has passed." });
             }
 
             submission.AnswerContent = dto.AnswerContent;
             submission.AttachmentUrl = dto.AttachmentUrl;
-            submission.UpdatedAt = DateTime.UtcNow;
+            submission.UpdatedAt = nowUtc;
+
+            // Recalculate status if deadline was extended or submission is on time
+            if (submission.Status == SubmissionStatus.Late && submission.SubmittedAt <= deadlineUtc)
+            {
+                submission.Status = submission.MarksAwarded.HasValue ? SubmissionStatus.Graded : SubmissionStatus.Submitted;
+            }
 
             await _context.SaveChangesAsync();
             return Ok(new { message = "Submission updated successfully" });

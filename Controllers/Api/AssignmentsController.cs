@@ -213,15 +213,29 @@ namespace Assignment_Submission_Management_System.Controllers.Api
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            var assignment = await _context.Assignments.FindAsync(id);
+            var assignment = await _context.Assignments
+                .Include(a => a.Submissions)
+                .FirstOrDefaultAsync(a => a.Id == id);
+
             if (assignment == null) return NotFound(new { message = "Assignment not found" });
+
+            var newDeadline = dto.Deadline.ToUniversalTime();
 
             assignment.Title = dto.Title;
             assignment.Description = dto.Description;
-            assignment.Deadline = dto.Deadline.ToUniversalTime();
+            assignment.Deadline = newDeadline;
             assignment.MaximumMarks = dto.MaximumMarks;
             assignment.IsDraft = dto.IsDraft;
             assignment.SubjectId = dto.SubjectId;
+
+            // Recalculate submission status for existing submissions if deadline extended
+            foreach (var sub in assignment.Submissions)
+            {
+                if (sub.SubmittedAt <= newDeadline && sub.Status == SubmissionStatus.Late)
+                {
+                    sub.Status = sub.MarksAwarded.HasValue ? SubmissionStatus.Graded : SubmissionStatus.Submitted;
+                }
+            }
 
             await _context.SaveChangesAsync();
             return Ok(new { message = "Assignment updated successfully" });
